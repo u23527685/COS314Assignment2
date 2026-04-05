@@ -40,9 +40,17 @@ public class Assignment_2 {
     }
 
     //Genetics
-    private static void Genetics(){}
+    private static void Genetics(List<Item> instances, float optimum){
+        int seed= instances.size();
+        Random rand = new Random(seed);
+        int bitCode= rand.nextInt();
+    }
 
     // Genetics Helpers
+    private static boolean Validate(){
+        return false;
+    }
+
 
     //Iterated Local Search
     private static void ILS(){}
@@ -56,7 +64,8 @@ public class Assignment_2 {
             List<Item>instances=ReadInstance(filename);
             for(Item instance : instances)
                 instance.print();
-                }
+            //Genetics(instances,opt);
+        }
         );
 
     }
