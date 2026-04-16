@@ -288,7 +288,7 @@ public class Assignment_2 {
         }
 
         long endTime = System.nanoTime();
-        double runtimeMilliSeconds = (endTime - startTime) / 1_000_000.0;
+        double runtimeSeconds = (endTime - startTime) / 1_000_000_000.0;
 
         System.out.print("ILS Solution: ");
         for (int i = 0; i < best.length; i++) {
@@ -297,7 +297,7 @@ public class Assignment_2 {
         System.out.println();
         System.out.println("ILS Total value: " + bestFitness);
         System.out.println("ILS Total weight: " + bestWeight);
-        System.out.println("ILS Runtime (ms): " + runtimeMilliSeconds);
+        System.out.println("ILS Runtime (seconds): " + runtimeSeconds);
         System.out.println("                                        ") ;
     }
     public static void main(String[] args) {
@@ -311,5 +311,5 @@ public class Assignment_2 {
         });
     }
 
-    }
+}
 
