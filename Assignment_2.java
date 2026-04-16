@@ -165,7 +165,7 @@ public class Assignment_2 {
             bestFitness = -1;
         }
 
-        int maxIterations = 300;
+        int maxIterations = 2500;
 
         // 7) Termination condition: maximum of 300 iterations
         for (int iter = 0; iter < maxIterations; iter++) {
