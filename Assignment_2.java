@@ -131,9 +131,6 @@ public class Assignment_2 {
                     }
                 }
 
-                Integer[] child3 = child1;
-                Integer[] child4 = child2;
-
                 // --- Mutation ---
                 // Check if we are stuck
                 boolean isStuck = (iteration > 50 && bestFitness < 0);
