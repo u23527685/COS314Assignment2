@@ -138,7 +138,7 @@ public class Assignment_2 {
 
                 for (int j = 0; j < seed; j++) {
                     float roll = rand.nextFloat();
-                    if (isStuck && bestFitness<0) {
+                    if (isStuck) {
                         // Force weight reduction: High chance to drop an item, 0 chance to add one
                         if (child1[j] == 1 && roll < 0.30f) child1[j] = 0;
                         if (child2[j] == 1 && roll < 0.30f) child2[j] = 0;
