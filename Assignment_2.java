@@ -42,6 +42,7 @@ public class Assignment_2 {
     //Genetics
     private static void Genetics(List<Item> instances){
         //Initializing population
+        long startTime = System.nanoTime();
         int seed= instances.size();
         float maxWheight= instances.get(0).wheight;
         Random rand = new Random(seed);
@@ -184,15 +185,22 @@ public class Assignment_2 {
             populationSize = newSize;
             iteration++;
 
+
         }
+        long endTime = System.nanoTime();
+        double runtimeSeconds = (endTime - startTime) / 1_000_000_000.0;
 
         if(bestFitness<0)
-            System.out.println("No solution found");
+            System.out.println("No solution found \n" );
         else {
-            System.out.print(" Solution: ");
+            System.out.println("Seed: " + seed);
+            System.out.print("GA Solution: ");
             for(int i=0; i<best.length;i++)
                 System.out.print(best[i]);
-            System.out.println(" Total value: " + (bestFitness));
+            System.out.println();
+            System.out.println("GA Total value: " + bestFitness);
+            System.out.println("GA Runtime (seconds): " + runtimeSeconds);
+            System.out.println();
         }
     }
 
@@ -222,7 +230,9 @@ public class Assignment_2 {
     public static void main(String[] args) {
         LoadOptimums();
         optimums.forEach((filename, opt) ->{
-            System.out.println("filename: " + filename + " , Known optimum: " + opt);
+            System.out.println("filename: " + filename );
+            System.out.println( "Known optimum: " + opt);
+            System.out.println( "Knapsack results after Genetic Algorithm:");
             List<Item>instances=ReadInstance(filename);
             Genetics(instances);
         }
