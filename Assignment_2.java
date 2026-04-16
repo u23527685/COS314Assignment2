@@ -62,7 +62,7 @@ public class Assignment_2 {
         int crossOverPoint1=seed/3;
         int crossOverPoint2=(seed/3)*2;
 
-        while(iteration <=100){
+        while(iteration <=800){
 
             // Find best in population and collect valid
             int validCount = 0;
@@ -134,12 +134,21 @@ public class Assignment_2 {
                 Integer[] child4 = child2;
 
                 // --- Mutation ---
+                // Check if we are stuck
+                boolean isStuck = (iteration > 50 && bestFitness < 0);
                 float mutationRate = 0.05f;
+
                 for (int j = 0; j < seed; j++) {
-                    if (rand.nextFloat() < mutationRate)
-                        child1[j] = 1 - child1[j];
-                    if (rand.nextFloat() < mutationRate)
-                        child2[j] = 1 - child2[j];
+                    float roll = rand.nextFloat();
+                    if (isStuck && bestFitness<0) {
+                        // Force weight reduction: High chance to drop an item, 0 chance to add one
+                        if (child1[j] == 1 && roll < 0.30f) child1[j] = 0;
+                        if (child2[j] == 1 && roll < 0.30f) child2[j] = 0;
+                    } else {
+                        // Normal 5% bit-flip mutation
+                        if (roll < mutationRate) child1[j] = 1 - child1[j];
+                        if (roll < mutationRate) child2[j] = 1 - child2[j];
+                    }
                 }
 
                 // Place children into the new population
@@ -186,6 +195,7 @@ public class Assignment_2 {
             System.out.println(" Total value: " + (bestFitness));
         }
     }
+
 
     // Genetics Helpers
     private static float Fitness(Integer[] bits,float maxWheight,List<Item> instances){
