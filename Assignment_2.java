@@ -81,17 +81,9 @@ public class Assignment_2 {
         Integer[][] population = new Integer[populationSize][seed];
 
         for (int i = 0; i < populationSize; i++) {
-            float currentWeight = 0;
-
             for (int j = 0; j < seed; j++) {
-                population[i][j] = 0;
-            }
-
-            for (int j = 0; j < seed; j++) {
-                if (rand.nextBoolean() && currentWeight + instances.get(j).wheight <= maxWheight) {
-                    population[i][j] = 1;
-                    currentWeight += instances.get(j).wheight;
-                }
+                int bitCode = rand.nextInt();
+                population[i][j] = Math.abs(bitCode % 2);
             }
         }
 
@@ -105,16 +97,20 @@ public class Assignment_2 {
         int crossOverPoint1 = seed / 3;
         int crossOverPoint2 = (seed / 3) * 2;
 
-        while (iteration <= 100) {
+        while (iteration <= 800) {
+            int validCount = 0;
             List<Integer[]> validGenes = new ArrayList<Integer[]>();
 
             for (int i = 0; i < populationSize; i++) {
-                if (population[i] == null) continue;
-                if (population[i][0] == null) continue;
+                if (population[i] == null)
+                    continue;
+                if (population[i][0] == null)
+                    continue;
 
                 float currFitness = Fitness(population[i], maxWheight, instances);
                 if (currFitness >= 0) {
                     validGenes.add(population[i]);
+                    validCount++;
                     if (currFitness >= bestFitness) {
                         bestFitness = currFitness;
                         best = population[i];
@@ -157,12 +153,18 @@ public class Assignment_2 {
                     }
                 }
 
-                float mutationRate = 0.02f;
+                boolean isStuck = (iteration > 50 && bestFitness < 0);
+                float mutationRate = 0.05f;
+
                 for (int j = 0; j < seed; j++) {
-                    if (rand.nextFloat() < mutationRate)
-                        child1[j] = 1 - child1[j];
-                    if (rand.nextFloat() < mutationRate)
-                        child2[j] = 1 - child2[j];
+                    float roll = rand.nextFloat();
+                    if (isStuck) {
+                        if (child1[j] == 1 && roll < 0.30f) child1[j] = 0;
+                        if (child2[j] == 1 && roll < 0.30f) child2[j] = 0;
+                    } else {
+                        if (roll < mutationRate) child1[j] = 1 - child1[j];
+                        if (roll < mutationRate) child2[j] = 1 - child2[j];
+                    }
                 }
 
                 if (childIndex + 1 < newPopulation.length) {
