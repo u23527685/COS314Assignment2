@@ -60,6 +60,168 @@ public class Assignment_2 {
         optimums.put("f10_l-d_kp_20_879", (float) 1025);
     }
 
+    //Genetics
+    private static void Genetics(List<Item> instances){
+        //Initializing population
+        long startTime = System.nanoTime();
+        int seed= instances.size();
+        float maxWheight= instances.get(0).wheight;
+        Random rand = new Random(seed);
+        // Populatoin
+        int populationSize=seed*10;
+        final int MAX_POPULATION= seed*20;
+        Integer[][] population= new Integer[populationSize][seed];
+        for(int i=0;i<populationSize;i++){
+            for(int j=0;j<seed;j++){
+                int bitCode= rand.nextInt();
+                population[i][j]=Math.abs(bitCode %2) ;
+            }
+        }
+
+        Integer[] best= new Integer[seed];
+        float bestFitness=-1;
+        int iteration=1;
+        int crossOverPoint1=seed/3;
+        int crossOverPoint2=(seed/3)*2;
+
+        while(iteration <=800){
+
+            // Find best in population and collect valid
+            int validCount = 0;
+            List<Integer[]> validGenes= new ArrayList<>();
+
+            for (int i = 0; i < populationSize; i++) {
+                if (population[i] == null)
+                    continue;
+                if (population[i][0] == null)
+                    continue;
+                float currFitness = Fitness(population[i], maxWheight, instances);
+                if (currFitness >= 0) {
+                    validGenes.add(population[i]);
+                    validCount++;
+                    if (currFitness >= bestFitness) {
+                        bestFitness = currFitness;
+                        best = population[i];
+                    }
+                }
+            }
+
+            // --- Crossover: produce a new population from pairs of parents ---
+            Integer[][] newPopulation = new Integer[populationSize][seed];
+            int childIndex = 0;
+
+            // Tournament
+            for (int i = 0; i < populationSize; i += 2) {
+                // --- Tournament for Parent A ---
+                // Individual i competes with individual i+1
+                // The one with the higher fitness value wins
+                float fitnessA = Fitness(population[i], maxWheight, instances);
+                float fitnessB = Fitness(population[(i + 1) % populationSize], maxWheight, instances);
+                int parentAIdx = (fitnessA > fitnessB) ? i : (i + 1) % populationSize;
+
+                // --- Tournament for Parent B ---
+                // Individual i+2 competes with individual i+3
+                // The % ensures we wrap around and never go out of bounds
+                int secondPair = (i + 2) % populationSize;
+                if (population[secondPair] == null || population[(secondPair + 1) % populationSize] == null)
+                    continue;
+
+                float fitnessC = Fitness(population[secondPair], maxWheight, instances);
+                float fitnessD = Fitness(population[(secondPair + 1) % populationSize], maxWheight, instances);
+                int parentBIdx = (fitnessC > fitnessD) ? secondPair : (secondPair + 1) % populationSize;
+
+                // If both tournaments picked the same individual, shift parentB by 1
+                // to ensure the two parents are always genetically distinct
+                if (parentAIdx == parentBIdx)
+                    parentBIdx = (parentBIdx + 1) % populationSize;
+
+                Integer[] parentA = population[parentAIdx];
+                Integer[] parentB = population[parentBIdx];
+
+                // --- Crossover ---
+                Integer[] child1 = new Integer[seed];
+                Integer[] child2 = new Integer[seed];
+
+                for (int j = 0; j < seed; j++) {
+                    if (j < crossOverPoint1 || j>crossOverPoint2) {
+                        child1[j] = parentA[j];
+                        child2[j] = parentB[j];
+                    } else {
+                        child1[j] = parentB[j];
+                        child2[j] = parentA[j];
+                    }
+                }
+
+                // --- Mutation ---
+                // Check if we are stuck
+                boolean isStuck = (iteration > 50 && bestFitness < 0);
+                float mutationRate = 0.05f;
+
+                for (int j = 0; j < seed; j++) {
+                    float roll = rand.nextFloat();
+                    if (isStuck) {
+                        // Force weight reduction: High chance to drop an item, 0 chance to add one
+                        if (child1[j] == 1 && roll < 0.30f) child1[j] = 0;
+                        if (child2[j] == 1 && roll < 0.30f) child2[j] = 0;
+                    } else {
+                        // Normal 5% bit-flip mutation
+                        if (roll < mutationRate) child1[j] = 1 - child1[j];
+                        if (roll < mutationRate) child2[j] = 1 - child2[j];
+                    }
+                }
+
+                // Place children into the new population
+                if (childIndex + 1 < newPopulation.length) {
+                    newPopulation[childIndex]     = child1;
+                    newPopulation[childIndex + 1] = child2;
+                    childIndex += 2;
+                }
+            }
+            // --- Survival of the Fittest ---
+            List<Integer[]> combinedPool = new ArrayList<>(validGenes);
+
+            for (int j = 0; j < childIndex; j++) {
+                if (newPopulation[j] != null) {
+                    combinedPool.add(newPopulation[j]);
+                }
+            }
+
+            combinedPool.sort((geneA, geneB) -> {
+                float fitnessA = Fitness(geneA, maxWheight, instances);
+                float fitnessB = Fitness(geneB, maxWheight, instances);
+                return Float.compare(fitnessB, fitnessA);
+            });
+
+            //making sure that population size is valid
+            int newSize = Math.min(MAX_POPULATION, combinedPool.size());
+
+            population = new Integer[MAX_POPULATION][seed];
+            for (int j = 0; j < MAX_POPULATION && j < combinedPool.size(); j++) {
+                population[j] = combinedPool.get(j);
+            }
+
+            populationSize = newSize;
+            iteration++;
+
+
+        }
+        long endTime = System.nanoTime();
+        double runtimeSeconds = (endTime - startTime) / 1_000_000_000.0;
+
+        if(bestFitness<0)
+            System.out.println("No solution found \n" );
+        else {
+            System.out.println("Seed: " + seed);
+            System.out.print("GA Solution: ");
+            for(int i=0; i<best.length;i++)
+                System.out.print(best[i]);
+            System.out.println();
+            System.out.println("GA Total value: " + bestFitness);
+            System.out.println("GA Runtime (seconds): " + runtimeSeconds);
+            System.out.println();
+        }
+    }
+
     private static String geneToString(Integer[] bits) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < bits.length; i++) {
