@@ -3,7 +3,9 @@ COS 314 assignment 2
 
 To run excecutable:
 
-Open the terminal and type this command
+Open the terminal.
+go to the directory of the assignment.
+type this command:
 java -jar <path-to-your-jar-file>
 
 seeds for each instance:
