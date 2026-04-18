@@ -63,7 +63,7 @@ public class Assignment_2 {
     //Genetics
     private static void Genetics(List<Item> instances){
         //Initializing population
-        long startTime = System.nanoTime();
+        long startTime = System.currentTimeMillis();
         int seed= instances.size();
         float maxWheight= instances.get(0).wheight;
         Random rand = new Random(seed);
@@ -231,33 +231,33 @@ public class Assignment_2 {
     }
 
     // Genetics
-    private static Result Genetics(String filename, List<Item> instances) {
+    private static Result Genetics(String filename, List<Item> instances, long seed) {
         long startTime = System.nanoTime();
 
-        int seed = instances.size();
+        int numItems = instances.size();
         float maxWheight = instances.get(0).wheight;
         Random rand = new Random(seed);
 
-        int populationSize = seed * 10;
-        final int MAX_POPULATION = seed * 20;
-        Integer[][] population = new Integer[populationSize][seed];
+        int populationSize = numItems * 10;
+        final int MAX_POPULATION = numItems * 20;
+        Integer[][] population = new Integer[populationSize][numItems];
 
         for (int i = 0; i < populationSize; i++) {
-            for (int j = 0; j < seed; j++) {
+            for (int j = 0; j < numItems; j++) {
                 int bitCode = rand.nextInt();
                 population[i][j] = Math.abs(bitCode % 2);
             }
         }
 
-        Integer[] best = new Integer[seed];
-        for (int i = 0; i < seed; i++) {
+        Integer[] best = new Integer[numItems];
+        for (int i = 0; i < numItems; i++) {
             best[i] = 0;
         }
 
         float bestFitness = -1;
         int iteration = 1;
-        int crossOverPoint1 = seed / 3;
-        int crossOverPoint2 = (seed / 3) * 2;
+        int crossOverPoint1 = (int)numItems / 3;
+        int crossOverPoint2 = ((int)numItems / 3) * 2;
 
         while (iteration <= 800) {
             int validCount = 0;
@@ -280,7 +280,7 @@ public class Assignment_2 {
                 }
             }
 
-            Integer[][] newPopulation = new Integer[populationSize][seed];
+            Integer[][] newPopulation = new Integer[populationSize][(int)numItems];
             int childIndex = 0;
 
             for (int i = 0; i < populationSize; i += 2) {
@@ -302,10 +302,10 @@ public class Assignment_2 {
                 Integer[] parentA = population[parentAIdx];
                 Integer[] parentB = population[parentBIdx];
 
-                Integer[] child1 = new Integer[seed];
-                Integer[] child2 = new Integer[seed];
+                Integer[] child1 = new Integer[(int)numItems];
+                Integer[] child2 = new Integer[(int)numItems];
 
-                for (int j = 0; j < seed; j++) {
+                for (int j = 0; j < numItems; j++) {
                     if (j < crossOverPoint1 || j > crossOverPoint2) {
                         child1[j] = parentA[j];
                         child2[j] = parentB[j];
@@ -318,7 +318,7 @@ public class Assignment_2 {
                 boolean isStuck = (iteration > 50 && bestFitness < 0);
                 float mutationRate = 0.05f;
 
-                for (int j = 0; j < seed; j++) {
+                for (int j = 0; j < numItems; j++) {
                     float roll = rand.nextFloat();
                     if (isStuck) {
                         if (child1[j] == 1 && roll < 0.30f) child1[j] = 0;
@@ -355,7 +355,7 @@ public class Assignment_2 {
 
             int newSize = Math.min(MAX_POPULATION, combinedPool.size());
 
-            population = new Integer[MAX_POPULATION][seed];
+            population = new Integer[MAX_POPULATION][(int)numItems];
             for (int j = 0; j < MAX_POPULATION && j < combinedPool.size(); j++) {
                 population[j] = combinedPool.get(j);
             }
@@ -374,15 +374,7 @@ public class Assignment_2 {
             solutionString = geneToString(best);
         }
 
-        return new Result(
-                filename,
-                "GA",
-                seed,
-                solutionString,
-                optimums.get(filename),
-                runtimeSeconds,
-                bestFitness
-        );
+        return new Result(filename, "GA", (int)seed, solutionString, optimums.get(filename), runtimeSeconds, bestFitness);
     }
 
     // Genetics Helpers
@@ -402,10 +394,10 @@ public class Assignment_2 {
     }
 
     // Iterated Local Search
-    private static Result ILS(String filename, List<Item> instances) {
+    private static Result ILS(String filename, List<Item> instances, long seed) {
         long startTime = System.nanoTime();
 
-        int seed = instances.size();
+        //int seed = instances.size();
         Random rand = new Random(seed);
 
         float maxWeight = instances.get(0).wheight;
@@ -619,7 +611,7 @@ public class Assignment_2 {
         return new Result(
                 filename,
                 "ILS",
-                seed,
+                (int)seed,
                 geneToString(best),
                 optimums.get(filename),
                 runtimeSeconds,
@@ -654,9 +646,12 @@ public class Assignment_2 {
         for (Map.Entry<String, Float> entry : optimums.entrySet()) {
             String filename = entry.getKey();
             List<Item> instances = ReadInstance(filename);
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Enter seed value for insance " + filename+" : ");
+            long seed = scanner.nextLong();
 
-            Result ilsResult = ILS(filename, instances);
-            Result gaResult = Genetics(filename, instances);
+            Result ilsResult = ILS(filename, instances, seed);
+            Result gaResult = Genetics(filename, instances,seed);
 
             results.add(ilsResult);
             results.add(gaResult);
@@ -700,15 +695,7 @@ public class Assignment_2 {
                 + "| %-" + wTotal + ".4f |%n";
 
         System.out.println(border);
-        System.out.printf(format,
-                "Problem Instance",
-                "Algorithm",
-                "Seed Value",
-                "Best Solution",
-                "Known Optimum",
-                "Runtime (seconds)",
-                "Total value"
-        );
+        System.out.printf(format, "Problem Instance", "Algorithm", "Seed Value", "Best Solution", "Known Optimum", "Runtime (seconds)", "Total value");
         System.out.println(border);
 
         for (int i = 0; i < results.size(); i++) {
@@ -719,15 +706,7 @@ public class Assignment_2 {
                 problemName = "";
             }
 
-            System.out.printf(rowFormat,
-                    problemName,
-                    r.algorithm,
-                    r.seed,
-                    r.bestSolution,
-                    r.knownOptimum,
-                    r.runtimeSeconds,
-                    r.totalValue
-            );
+            System.out.printf(rowFormat, problemName, r.algorithm, r.seed, r.bestSolution, r.knownOptimum, r.runtimeSeconds, r.totalValue);
 
             if (i % 2 == 1) {
                 System.out.println(border);
